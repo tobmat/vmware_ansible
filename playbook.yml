@@ -1,0 +1,74 @@
+# Basic deploy of a service
+---
+- hosts: localhost
+  vars_files: 
+     - vars/main.yml
+     - vars/secrets.yml
+  environment:
+    #VMWARE_HOST: "{{ vsphere_host }}"
+    VMWARE_USER: "{{ vault_vsphere_user }}"
+    VMWARE_PASSWORD: "{{ vault_vsphere_password }}"
+    VMWARE_VALIDATE_CERTS: no
+
+  tasks:
+
+   - pip:
+       name: PyVmomi
+  
+   - name: Provide information about vCenter
+     vmware_about_facts:
+       hostname: "{{ vsphere_host }}"
+     register: vcenter_about_info
+  
+   - name: display vcenter info
+     debug:
+       #msg: "{{ vcenter_about_info }}"
+       var: vcenter_about_info
+  
+#  - name: Provide Category Info          
+#    vmware_category_facts:              <<<<< needs special libraries installed
+#    vmware_tag_facts:                   <<<<< needs special libraries installed
+#      hostname: "{{ vsphere_host }}"
+#    register: vcenter_category_facts
+# 
+#  - name: display vcenter category info
+#    debug:
+#      #msg: "{{ vcenter_about_info }}"
+#      var: vcenter_category_facts
+
+   - name: Gather cluster facts from given datacenter
+     #vmware_cluster_facts:
+     vmware_datastore_facts:           # <<<<< this is broken, python issue DeprecationWarning: the imp module is deprecated in favour of importlib
+     #vmware_drs_rule_facts:
+     #vmware_guest_disk_facts:
+     #vmware_guest_facts:
+     #vmware_guest_snapshot_facts:
+     #vmware_host_capability_facts:
+     #vmware_host_config_facts:
+     #vmware_host_dns_facts:
+     #vmware_host_facts:
+     #vmware_host_firewall_facts:
+     #vmware_host_ntp_facts:0
+     #vmware_host_package_facts:        <<<<< this is broken, python issue DeprecationWarning: the imp module is deprecated in favour of importlib
+     #vmware_host_service_facts:
+     #vmware_host_ssl_facts:
+     #vmware_host_vmnic_facts:
+     #vmware_local_role_facts:
+     #vmware_local_user_facts:          <<<<< don't have login info directly to esxi servers
+     #vmware_portgroup_facts:
+     #vmware_resource_pool_facts:
+     #vmware_target_canonical_facts:
+     #vmware_vm_facts:
+     #vmware_vmkernel_facts:
+     #vmware_vswitch_facts:
+       hostname: "{{ vsphere_host }}"
+       #hostname: d-corp-vhost-0a.adesa.com
+       datacenter: CARMEL
+       #cluster_name: LAB1
+       #name: s-lab-solar1
+       #folder: /LAB/vm/LAB1
+     register: cluster_facts      
+  
+   - name: display cluster info
+     debug:
+       var: cluster_facts
